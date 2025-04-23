@@ -54,6 +54,12 @@ const systemPrompt = `
   Answer: <Suggested activities based on sunny weather that are highly specific to New York City and surrounding areas.>
 `
 
+const availableFunctions = {
+  "getCurrentWeather": getCurrentWeather,
+  "getLocation": getLocation
+}
+
+
 async function agent(query) {
     const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -78,23 +84,27 @@ async function agent(query) {
     // Parse the action (function and parameter) from the string
     const actions = actionRegex.exec(foundActionLine)
 
-    // Add an "Obversation" message with the results of the function call
-    const action = actions[1]
-    const parameter = actions[2]
-    let result = null
-    if (action === "getCurrentWeather") {
-        result = await getCurrentWeather(parameter)
-    } else if (action === "getLocation") {
-        result = await getLocation()
-    }
+    // Destructuring the array obtained in response from actionRegex.exec(foundActionLine)
+    // Example of returned array -> ['Action: getLocation: null', 'getLocation', 'null']
+    // we don't need the first element string (so we use a general placeholder for it)
+    const [_, action, actionArg] = actions
 
-    return  result
+    console.log(`Action: ${action}(${actionArg})`);
+
+
+    // Add an "Obversation" message with the results of the function call
+    // Observation is the response that we have when we call the function
+    const observation = await availableFunctions[action](actionArg)
+
+
+    return  observation
 }
 
 
 
-const query = "Where am I located?"
-const response = await agent(query)
+// const query = "Where am I located?"
+// const query = "What is the current weather in New York City?"
+// const response = await agent(query)
 // console.log(response)
 
 

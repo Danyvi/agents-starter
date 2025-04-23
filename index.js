@@ -122,9 +122,10 @@ async function agent(query) {
 
 
 // const query = "Where am I located?"
-const query = "What is the current weather in New York City?"
-const response = await agent(query)
-console.log(response)
+// const query = "What is the current weather in New York City?"
+// const query = "What is the current weather in my location?"
+// const response = await agent(query)
+// console.log(response)
 
 
 

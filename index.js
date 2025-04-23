@@ -127,5 +127,13 @@ async function agent(query) {
 // const response = await agent(query)
 // console.log(response)
 
+/**
+ * EXAMPLES
+ *
+ * "What are some activity ideas that I can do this afternoon based on my location and weather?"
 
+/**
+Answer: Based on the current weather in New York City (72°F and sunny), here are some activity ideas for this afternoon: 1. Visit Central Park and have a picnic. 2. Explore the High Line and enjoy the scenic views. 3. Take a stroll along the Brooklyn Bridge. 4. Visit the Metropolitan Museum of Art or other museums in the city. 5. Rent a bike and ride along the Hudson River Park. 6. Enjoy a boat tour around Manhattan. These activities are perfect for enjoying the sunny weather in New York City. Have a great afternoon!
+/index.html
+ */
 

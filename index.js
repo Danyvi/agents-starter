@@ -73,6 +73,7 @@ async function agent(query) {
   })
 
   const responseText = response.choices[0].message.content
+  messages.push({ role: "assistant", content: responseText })
 
   // Split the string (into an array of strings) on the newline character ("\n")
   const responseLines = responseText.split("\n")
@@ -83,22 +84,26 @@ async function agent(query) {
   const actionRegex = /^Action: (\w+): (.*)$/
   const foundActionLine = responseLines.find(line => actionRegex.test(line))
 
+  if (foundActionLine) {
+    // Parse the action (function and parameter) from the string
+    const actions = actionRegex["exec"](foundActionLine)
 
-  // Parse the action (function and parameter) from the string
-  const actions = actionRegex.exec(foundActionLine)
+    // Destructuring the array obtained in response from actionRegex.exec(foundActionLine)
+    // Example of returned array -> ['Action: getLocation: null', 'getLocation', 'null']
+    // we don't need the first element string (so we use a general placeholder for it)
+    const [_, action, actionArg] = actions
 
-  // Destructuring the array obtained in response from actionRegex.exec(foundActionLine)
-  // Example of returned array -> ['Action: getLocation: null', 'getLocation', 'null']
-  // we don't need the first element string (so we use a general placeholder for it)
-  const [_, action, actionArg] = actions
+    console.log(`Action: ${action}(${actionArg})`);
 
-  console.log(`Action: ${action}(${actionArg})`);
+    if (!availableFunctions.hasOwnProperty(action)) {
+      throw new Error(`Unknown action: ${action}: ${actionArg}`)
+    }
 
-
-  // Add an "Obversation" message with the results of the function call
-  // Observation is the response that we have when we call the function
-  const observation = await availableFunctions[action](actionArg)
-
+    // Add an "Obversation" message with the results of the function call
+    // Observation is the response that we have when we call the function
+    const observation = await availableFunctions[action](actionArg)
+    message.push({ role: "assistant", content: `Observation: ${observation}` })
+  }
 
   return  observation
 }

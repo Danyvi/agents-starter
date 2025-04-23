@@ -61,43 +61,46 @@ const availableFunctions = {
 
 
 async function agent(query) {
-    const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: query }
-        ]
-    })
 
-    const responseText = response.choices[0].message.content
+  const messages = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: query }
+  ]
 
-    // Split the string (into an array of strings) on the newline character ("\n")
-    const responseLines = responseText.split("\n")
+  const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: messages
+  })
 
-    // Search through the array of strings for one that has "Action:"
-    // regex.test will return true of false if the string we provided matches the regex
-    // Example of return -> 'Action: getLocation: null'
-    const actionRegex = /^Action: (\w+): (.*)$/
-    const foundActionLine = responseLines.find(line => actionRegex.test(line))
+  const responseText = response.choices[0].message.content
 
+  // Split the string (into an array of strings) on the newline character ("\n")
+  const responseLines = responseText.split("\n")
 
-    // Parse the action (function and parameter) from the string
-    const actions = actionRegex.exec(foundActionLine)
-
-    // Destructuring the array obtained in response from actionRegex.exec(foundActionLine)
-    // Example of returned array -> ['Action: getLocation: null', 'getLocation', 'null']
-    // we don't need the first element string (so we use a general placeholder for it)
-    const [_, action, actionArg] = actions
-
-    console.log(`Action: ${action}(${actionArg})`);
+  // Search through the array of strings for one that has "Action:"
+  // regex.test will return true of false if the string we provided matches the regex
+  // Example of return -> 'Action: getLocation: null'
+  const actionRegex = /^Action: (\w+): (.*)$/
+  const foundActionLine = responseLines.find(line => actionRegex.test(line))
 
 
-    // Add an "Obversation" message with the results of the function call
-    // Observation is the response that we have when we call the function
-    const observation = await availableFunctions[action](actionArg)
+  // Parse the action (function and parameter) from the string
+  const actions = actionRegex.exec(foundActionLine)
+
+  // Destructuring the array obtained in response from actionRegex.exec(foundActionLine)
+  // Example of returned array -> ['Action: getLocation: null', 'getLocation', 'null']
+  // we don't need the first element string (so we use a general placeholder for it)
+  const [_, action, actionArg] = actions
+
+  console.log(`Action: ${action}(${actionArg})`);
 
 
-    return  observation
+  // Add an "Obversation" message with the results of the function call
+  // Observation is the response that we have when we call the function
+  const observation = await availableFunctions[action](actionArg)
+
+
+  return  observation
 }
 
 

@@ -54,14 +54,48 @@ const systemPrompt = `
   Answer: <Suggested activities based on sunny weather that are highly specific to New York City and surrounding areas.>
 `
 
-const response = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
-    messages: [
-        {
-            role: "user",
-            content: `Give me a list of activity ideas based on my current location of ${location} and weather of ${weather}`
-        }
-    ]
-})
+async function agent(query) {
+    const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: query }
+        ]
+    })
 
-console.log(response.choices[0].message.content)
+    const responseText = response.choices[0].message.content
+
+    // Split the string (into an array of strings) on the newline character ("\n")
+    const responseLines = responseText.split("\n")
+
+    // Search through the array of strings for one that has "Action:"
+    // regex.test will return true of false if the string we provided matches the regex
+    // Example of return -> 'Action: getLocation: null'
+    const actionRegex = /^Action: (\w+): (.*)$/
+    const foundActionLine = responseLines.find(line => actionRegex.test(line))
+
+
+    // Parse the action (function and parameter) from the string
+    const actions = actionRegex.exec(foundActionLine)
+
+    // Add an "Obversation" message with the results of the function call
+    const action = actions[1]
+    const parameter = actions[2]
+    let result = null
+    if (action === "getCurrentWeather") {
+        result = await getCurrentWeather(parameter)
+    } else if (action === "getLocation") {
+        result = await getLocation()
+    }
+
+    return  result
+}
+
+
+
+const query = "Where am I located?"
+const response = await agent(query)
+// console.log(response)
+
+
+

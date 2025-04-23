@@ -1,4 +1,6 @@
-export async function getCurrentWeather() {
+export async function getCurrentWeather(location) {
+  console.log(`Getting current weather for ${location}`);
+
   const weather = {
       temperature: "72",
       unit: "F",
